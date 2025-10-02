@@ -5,12 +5,12 @@
 #
 # This script installs and configures:
 # - Node.js v22 LTS, NPM, PNPM
-# - GitHub CLI, Neovim
-# - Claude Code, OpenAI Codex, Claude Squad
+# - GitHub CLI, Neovim, ripgrep, fzf
+# - Claude Code, OpenAI Codex, OpenCode, Claude Squad
 # - Playwright with all browsers and system dependencies
 # - MCP Servers (Playwright, Context7, Sequential Thinking, Bright Data, Task Master)
 #
-# Validated for Ubuntu 22.04/24.04 LTS (October 2025)
+# Validated for Ubuntu 22.04/24.04/25.04 LTS (October 2025)
 # Designed for root user execution
 #
 # Usage: sudo bash setup-dev-environment.sh
@@ -27,7 +27,7 @@ BLUE='\033[0;34m'
 NC='\033[0m' # No Color
 
 # Script version
-SCRIPT_VERSION="1.1.0"
+SCRIPT_VERSION="1.2.0"
 SCRIPT_DATE="2025-10-02"
 
 ################################################################################
@@ -71,7 +71,7 @@ check_root() {
 main() {
     print_header "Development Environment Setup - v${SCRIPT_VERSION}"
     print_info "Date: ${SCRIPT_DATE}"
-    print_info "Target: Ubuntu 22.04/24.04 LTS"
+    print_info "Target: Ubuntu 22.04/24.04/25.04 LTS"
     echo ""
 
     check_root
@@ -97,7 +97,9 @@ main() {
         gnupg \
         lsb-release \
         software-properties-common \
-        apt-transport-https
+        apt-transport-https \
+        ripgrep \
+        fzf
     print_success "Base dependencies installed"
 
     print_info "Installing Playwright system dependencies..."
@@ -119,7 +121,21 @@ main() {
             libasound2t64 \
             fonts-liberation \
             libappindicator3-1 \
-            xdg-utils
+            xdg-utils \
+            libgtk-4-1 \
+            libgraphene-1.0-0 \
+            libvpx9 \
+            libevent-2.1-7t64 \
+            libopus0 \
+            libwebpdemux2 \
+            libavif16 \
+            libharfbuzz-icu0 \
+            libwebpmux3 \
+            libenchant-2-2 \
+            libsecret-1-0 \
+            libhyphen0 \
+            gstreamer1.0-plugins-base \
+            gstreamer1.0-plugins-good
     else
         apt install -y \
             libnss3 \
@@ -134,7 +150,21 @@ main() {
             libasound2 \
             fonts-liberation \
             libappindicator3-1 \
-            xdg-utils
+            xdg-utils \
+            libgtk-4-1 \
+            libgraphene-1.0-0 \
+            libvpx9 \
+            libevent-2.1-7 \
+            libopus0 \
+            libwebpdemux2 \
+            libavif16 \
+            libharfbuzz-icu0 \
+            libwebpmux3 \
+            libenchant-2-2 \
+            libsecret-1-0 \
+            libhyphen0 \
+            gstreamer1.0-plugins-base \
+            gstreamer1.0-plugins-good
     fi
     print_success "Playwright system dependencies installed"
 
@@ -189,20 +219,30 @@ main() {
     GH_VERSION=$(gh --version | head -n 1)
     print_success "GitHub CLI installed: ${GH_VERSION}"
 
+    # Section 4: Installing Neovim
+    print_header "4. Installing Neovim"
+    
     print_info "Installing Neovim..."
-    # Add Neovim stable PPA for latest version
-    add-apt-repository -y ppa:neovim-ppa/stable 2>/dev/null || {
-        print_info "Installing software-properties-common for PPA support..."
-        apt install -y software-properties-common
-        add-apt-repository -y ppa:neovim-ppa/stable
-    }
-    apt update
-    apt install -y neovim python3-neovim
+    # Try PPA first, fall back to default repos for Ubuntu 25.04+
+    if dpkg --compare-versions "$(lsb_release -rs)" lt "25.04"; then
+        print_info "Adding Neovim stable PPA..."
+        add-apt-repository -y ppa:neovim-ppa/stable 2>/dev/null || {
+            print_info "Installing software-properties-common for PPA support..."
+            apt install -y software-properties-common
+            add-apt-repository -y ppa:neovim-ppa/stable
+        }
+        apt update
+        apt install -y neovim python3-neovim
+    else
+        print_info "Using default repository for Ubuntu 25.04+..."
+        apt install -y neovim python3-pynvim
+    fi
+    
     NVIM_VERSION=$(nvim --version | head -n 1)
     print_success "Neovim installed: ${NVIM_VERSION}"
 
-    # Section 4: AI Coding Tools
-    print_header "4. Installing AI Coding Tools"
+    # Section 5: AI Coding Tools
+    print_header "5. Installing AI Coding Tools"
 
     print_info "Installing Claude Code v2.0.1..."
     npm install -g @anthropic-ai/claude-code
@@ -214,12 +254,10 @@ main() {
     CODEX_VERSION=$(codex --version 2>/dev/null || echo "installed - run 'codex --version' to verify")
     print_success "OpenAI Codex installed: ${CODEX_VERSION}"
 
-    print_info "Installing OpenCode..."
-    print_warning "Note: OpenCode repository is archived but still functional"
-    curl -fsSL https://raw.githubusercontent.com/opencode-ai/opencode/refs/heads/main/install | bash
+    print_info "Installing OpenCode (SST)..."
+    npm install -g opencode-ai
     OPENCODE_VERSION=$(opencode --version 2>/dev/null || echo "installed - run 'opencode --version' to verify")
     print_success "OpenCode installed: ${OPENCODE_VERSION}"
-    print_info "Alternative: Crush by Charm is the successor (charmbracelet/crush)"
 
     print_info "Installing Claude Squad..."
     print_info "Installing tmux dependency..."
@@ -234,8 +272,8 @@ main() {
     print_success "Claude Squad installed: ${CS_VERSION}"
     print_info "Claude Squad manages multiple AI terminal agents in isolated workspaces"
 
-    # Section 5: Playwright
-    print_header "5. Installing Playwright with Browsers"
+    # Section 6: Playwright
+    print_header "6. Installing Playwright with Browsers"
 
     print_info "Installing Playwright v1.55.1 globally..."
     npm install -g playwright
@@ -245,20 +283,14 @@ main() {
     print_info "Installing Playwright browsers (Chromium, Firefox, WebKit)..."
     print_warning "This may take several minutes..."
 
-    # Install ICU library if on Ubuntu 25.04+
-    if dpkg --compare-versions "$(lsb_release -rs)" ge "25.04"; then
-        print_info "Installing libicu76 for Ubuntu 25.04+..."
-        apt install -y libicu76
-    fi
-
-    # Install browsers without --with-deps since we already installed system dependencies
+    # Install browsers
     playwright install
     print_success "All Playwright browsers installed"
 
-    # Section 6: MCP Servers
-    print_header "6. Installing MCP Servers (6 Total)"
+    # Section 7: MCP Servers
+    print_header "7. Installing MCP Servers (6 Total)"
 
-    print_info "Installing Playwright MCP (Microsoft official)..."
+    print_info "Installing Playwright MCP..."
     npm install -g @playwright/mcp
     print_success "Playwright MCP installed"
 
@@ -282,8 +314,8 @@ main() {
     npm install -g server-perplexity-ask
     print_success "Perplexity Ask MCP installed"
 
-    # Section 7: Validation & Summary
-    print_header "7. Installation Summary & Validation"
+    # Section 8: Validation & Summary
+    print_header "8. Installation Summary & Validation"
 
     echo ""
     print_info "Installed Versions:"
@@ -295,6 +327,8 @@ main() {
     echo "  • NPM: v$(npm --version)"
     echo "  • PNPM: $(pnpm --version 2>/dev/null || echo 'installed - reload shell')"
     echo "  • Git: $(git --version)"
+    echo "  • ripgrep: $(rg --version | head -n 1)"
+    echo "  • fzf: $(fzf --version)"
     echo ""
 
     # Developer Tools
@@ -307,7 +341,7 @@ main() {
     echo -e "${GREEN}AI Coding Tools:${NC}"
     echo "  • Claude Code: $(claude --version 2>/dev/null || echo 'v2.0.1 (run claude --version)')"
     echo "  • OpenAI Codex: $(codex --version 2>/dev/null || echo 'v0.42.0 (run codex --version)')"
-    echo "  • OpenCode: $(/root/.opencode/bin/opencode --version 2>/dev/null || echo 'v0.0.55 (reload shell)')"
+    echo "  • OpenCode: $(opencode --version 2>/dev/null || echo 'installed (reload shell)')"
     echo "  • Claude Squad: $(cs version 2>/dev/null || claude-squad version 2>/dev/null || echo 'installed (run cs version)')"
     echo ""
 
@@ -318,6 +352,8 @@ main() {
 
     # MCP Servers
     echo -e "${GREEN}MCP Servers (6 Total):${NC}"
+    MCP_COUNT=$(npm list -g | grep -E "@playwright/mcp|@upstash|@modelcontextprotocol|@brightdata|task-master|perplexity" | wc -l)
+    echo "  • Total installed: ${MCP_COUNT}/6"
     echo "  • Playwright MCP: $(npm list -g @playwright/mcp | grep @playwright/mcp || echo 'installed')"
     echo "  • Context7 MCP: $(npm list -g @upstash/context7-mcp | grep @upstash/context7-mcp || echo 'installed')"
     echo "  • Sequential Thinking MCP: $(npm list -g @modelcontextprotocol/server-sequential-thinking | grep @modelcontextprotocol || echo 'installed')"
@@ -328,14 +364,14 @@ main() {
     echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
     echo ""
 
-    print_header "8. Next Steps & Configuration"
+    print_header "9. Next Steps & Configuration"
 
     echo ""
     print_info "Configuration Notes:"
     echo ""
-    echo "1. PNPM Environment:"
-    echo "   • PNPM has been installed and configured in /root/.bashrc"
+    echo "1. Environment Reload:"
     echo "   • Run: source /root/.bashrc OR start a new shell session"
+    echo "   • This loads PNPM and other environment variables"
     echo ""
 
     echo "2. GitHub CLI Authentication:"
@@ -355,21 +391,27 @@ main() {
     echo "   • Documentation: https://github.com/openai/codex"
     echo ""
 
-    echo "5. Claude Squad Setup:"
+    echo "5. OpenCode Setup:"
+    echo "   • Run: opencode"
+    echo "   • Configure your preferred AI provider (Claude, OpenAI, etc.)"
+    echo "   • Documentation: https://github.com/sst/opencode"
+    echo ""
+
+    echo "6. Claude Squad Setup:"
     echo "   • Run: cs (or claude-squad)"
     echo "   • Manage multiple AI agents: Claude Code, Codex, Gemini, Aider"
     echo "   • Works with isolated git workspaces for each task"
     echo "   • Documentation: https://github.com/smtg-ai/claude-squad"
     echo ""
 
-    echo "6. MCP Server Configuration:"
+    echo "7. MCP Server Configuration:"
     echo "   • Context7: Requires API key from upstash.com"
     echo "   • Bright Data: Requires API token (free tier: 5,000 requests/month)"
     echo "   • Task Master: Requires API keys for AI providers"
     echo "   • Add MCP servers to Claude Code: claude mcp add <server-name>"
     echo ""
 
-    echo "7. Playwright Usage:"
+    echo "8. Playwright Usage:"
     echo "   • Installed globally with chromium, firefox, and webkit browsers"
     echo "   • Test: playwright --version"
     echo "   • Run codegen: playwright codegen https://example.com"
@@ -386,16 +428,13 @@ main() {
 
     print_success "All tools have been installed and validated"
     print_info "Script version: ${SCRIPT_VERSION} (${SCRIPT_DATE})"
-    print_info "Validated for October 2025 package versions"
+    print_info "Validated for October 2025 with Ubuntu 25.04 support"
     echo ""
     print_info "To verify installations, run:"
     echo "  node --version && npm --version && pnpm --version"
-    echo "  gh --version"
-    echo "  nvim --version"
-    echo "  claude --version"
-    echo "  codex --version"
-    echo "  cs version"
-    echo "  playwright --version"
+    echo "  gh --version && nvim --version"
+    echo "  claude --version && opencode --version"
+    echo "  cs version && playwright --version"
     echo ""
     print_success "Happy coding! 🚀"
     echo ""
