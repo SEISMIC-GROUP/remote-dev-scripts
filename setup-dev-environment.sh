@@ -5,7 +5,7 @@
 #
 # This script installs and configures:
 # - Node.js v22 LTS, NPM, PNPM
-# - GitHub CLI
+# - GitHub CLI, Neovim
 # - Claude Code, OpenAI Codex, Claude Squad
 # - Playwright with all browsers and system dependencies
 # - MCP Servers (Playwright, Context7, Sequential Thinking, Bright Data, Task Master)
@@ -189,6 +189,18 @@ main() {
     GH_VERSION=$(gh --version | head -n 1)
     print_success "GitHub CLI installed: ${GH_VERSION}"
 
+    print_info "Installing Neovim..."
+    # Add Neovim stable PPA for latest version
+    add-apt-repository -y ppa:neovim-ppa/stable 2>/dev/null || {
+        print_info "Installing software-properties-common for PPA support..."
+        apt install -y software-properties-common
+        add-apt-repository -y ppa:neovim-ppa/stable
+    }
+    apt update
+    apt install -y neovim python3-neovim
+    NVIM_VERSION=$(nvim --version | head -n 1)
+    print_success "Neovim installed: ${NVIM_VERSION}"
+
     # Section 4: AI Coding Tools
     print_header "4. Installing AI Coding Tools"
 
@@ -288,6 +300,7 @@ main() {
     # Developer Tools
     echo -e "${GREEN}Developer Tools:${NC}"
     echo "  • GitHub CLI: $(gh --version | head -n 1)"
+    echo "  • Neovim: $(nvim --version | head -n 1)"
     echo ""
 
     # AI Coding Tools
@@ -378,6 +391,7 @@ main() {
     print_info "To verify installations, run:"
     echo "  node --version && npm --version && pnpm --version"
     echo "  gh --version"
+    echo "  nvim --version"
     echo "  claude --version"
     echo "  codex --version"
     echo "  cs version"

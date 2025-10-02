@@ -14,7 +14,7 @@ This directory contains validated, production-ready scripts for setting up a com
 - Browser automation (Playwright with all browsers)
 - 6 MCP (Model Context Protocol) servers
 - Package managers (NPM, PNPM)
-- Developer tools (GitHub CLI)
+- Developer tools (GitHub CLI, Neovim)
 
 All scripts have been **tested and validated** on DigitalOcean Ubuntu 25.04 (delta2 - 167.172.166.13).
 
@@ -32,6 +32,7 @@ All scripts have been **tested and validated** on DigitalOcean Ubuntu 25.04 (del
 - Node.js 22 LTS via NodeSource
 - PNPM installation with PATH configuration
 - GitHub CLI from official repository
+- Neovim from stable PPA
 - AI tools: Claude Code, OpenAI Codex, OpenCode, Claude Squad
 - Playwright with all browsers (Chromium, Firefox, WebKit)
 - 6 MCP servers: Playwright, Context7, Sequential Thinking, Bright Data, Task Master, Perplexity Ask
@@ -147,6 +148,7 @@ bash /root/validate-installation.sh
 node --version        # v22.20.0
 npm --version         # 10.9.3
 pnpm --version        # 10.17.1
+nvim --version        # NVIM version
 claude --version      # 2.0.1
 codex --version       # 0.42.0
 opencode --version    # 0.0.55
@@ -182,6 +184,7 @@ Node.js:     /usr/bin/node
 NPM:         /usr/bin/npm
 PNPM:        /root/.local/share/pnpm/pnpm
 GitHub CLI:  /usr/bin/gh
+Neovim:      /usr/bin/nvim
 ```
 
 ### AI Coding Tools
@@ -392,6 +395,7 @@ apt update && apt upgrade -y
 - NPM: v10.9.3
 - PNPM: v10.17.1
 - GitHub CLI: v2.80.0
+- Neovim: Latest stable from PPA
 - Claude Code: v2.0.1
 - OpenAI Codex: v0.42.0
 - OpenCode: v0.0.55
@@ -415,6 +419,7 @@ All versions validated from official registries on October 1, 2025.
 ### Official Documentation
 - Node.js: https://nodejs.org/
 - PNPM: https://pnpm.io/
+- Neovim: https://neovim.io/
 - Playwright: https://playwright.dev/
 - Claude Code: https://docs.claude.com/en/docs/claude-code
 - OpenAI Codex: https://github.com/openai/codex
@@ -467,6 +472,7 @@ Use this checklist after running the installation:
 - [ ] NPM v10.x or v11.x installed
 - [ ] PNPM v10.x installed
 - [ ] GitHub CLI v2.x installed
+- [ ] Neovim installed (latest stable)
 - [ ] Claude Code v2.x installed
 - [ ] OpenAI Codex v0.4x installed
 - [ ] OpenCode v0.0.55 installed
@@ -487,7 +493,9 @@ Use this checklist after running the installation:
 - Added Claude Squad installation and configuration
 - Claude Squad manages multiple AI terminal agents (Claude Code, Codex, Gemini, Aider)
 - Includes tmux dependency for terminal management
-- Updated documentation to reflect Claude Squad integration
+- Added Neovim installation from stable PPA
+- Neovim provides modern vim-based text editing capabilities
+- Updated documentation to reflect Claude Squad and Neovim integration
 
 ### Version 1.0.0 - October 1, 2025
 - Initial release
