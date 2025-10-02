@@ -10,7 +10,7 @@
 
 This directory contains validated, production-ready scripts for setting up a complete development environment on Ubuntu cloud servers with:
 - Modern JavaScript runtime (Node.js 22 LTS)
-- AI coding tools (Claude Code, OpenAI Codex, OpenCode)
+- AI coding tools (Claude Code, OpenAI Codex, OpenCode, Claude Squad)
 - Browser automation (Playwright with all browsers)
 - 6 MCP (Model Context Protocol) servers
 - Package managers (NPM, PNPM)
@@ -32,7 +32,7 @@ All scripts have been **tested and validated** on DigitalOcean Ubuntu 25.04 (del
 - Node.js 22 LTS via NodeSource
 - PNPM installation with PATH configuration
 - GitHub CLI from official repository
-- AI tools: Claude Code, OpenAI Codex, OpenCode
+- AI tools: Claude Code, OpenAI Codex, OpenCode, Claude Squad
 - Playwright with all browsers (Chromium, Firefox, WebKit)
 - 6 MCP servers: Playwright, Context7, Sequential Thinking, Bright Data, Task Master, Perplexity Ask
 - Color-coded output with progress tracking
@@ -150,6 +150,7 @@ pnpm --version        # 10.17.1
 claude --version      # 2.0.1
 codex --version       # 0.42.0
 opencode --version    # 0.0.55
+cs version            # claude-squad version
 playwright --version  # 1.55.1
 ```
 
@@ -161,6 +162,7 @@ playwright --version  # 1.55.1
 - **Claude Code:** Anthropic API key
 - **OpenAI Codex:** ChatGPT account (Plus/Pro/Team/Enterprise)
 - **OpenCode:** No API key required
+- **Claude Squad:** Uses API keys from the individual tools it manages (Claude Code, Codex, etc.)
 
 ### For MCP Servers
 - **Sequential Thinking:** No API key required
@@ -184,9 +186,10 @@ GitHub CLI:  /usr/bin/gh
 
 ### AI Coding Tools
 ```
-Claude Code: /usr/lib/node_modules/@anthropic-ai/claude-code
-Codex:       /usr/lib/node_modules/@openai/codex
-OpenCode:    /root/.opencode/bin/opencode
+Claude Code:  /usr/lib/node_modules/@anthropic-ai/claude-code
+Codex:        /usr/lib/node_modules/@openai/codex
+OpenCode:     /root/.opencode/bin/opencode
+Claude Squad: /usr/local/bin/claude-squad (symlinked to /usr/local/bin/cs)
 ```
 
 ### Playwright
@@ -392,6 +395,7 @@ apt update && apt upgrade -y
 - Claude Code: v2.0.1
 - OpenAI Codex: v0.42.0
 - OpenCode: v0.0.55
+- Claude Squad: Latest (manages Claude Code, Codex, Gemini, Aider)
 - Playwright: v1.55.1
 
 ### MCP Server Versions
@@ -415,6 +419,7 @@ All versions validated from official registries on October 1, 2025.
 - Claude Code: https://docs.claude.com/en/docs/claude-code
 - OpenAI Codex: https://github.com/openai/codex
 - OpenCode: https://github.com/opencode-ai/opencode (archived)
+- Claude Squad: https://github.com/smtg-ai/claude-squad
 
 ### MCP Resources
 - MCP Specification: https://modelcontextprotocol.io/
@@ -465,6 +470,7 @@ Use this checklist after running the installation:
 - [ ] Claude Code v2.x installed
 - [ ] OpenAI Codex v0.4x installed
 - [ ] OpenCode v0.0.55 installed
+- [ ] Claude Squad installed and accessible via 'cs' command
 - [ ] Playwright v1.5x installed
 - [ ] All 3 browsers installed (Chromium, Firefox, WebKit)
 - [ ] All 6 MCP servers installed
@@ -476,6 +482,12 @@ Use this checklist after running the installation:
 ---
 
 ## 📝 Change Log
+
+### Version 1.1.0 - October 2, 2025
+- Added Claude Squad installation and configuration
+- Claude Squad manages multiple AI terminal agents (Claude Code, Codex, Gemini, Aider)
+- Includes tmux dependency for terminal management
+- Updated documentation to reflect Claude Squad integration
 
 ### Version 1.0.0 - October 1, 2025
 - Initial release

@@ -6,7 +6,7 @@
 # This script installs and configures:
 # - Node.js v22 LTS, NPM, PNPM
 # - GitHub CLI
-# - Claude Code, OpenAI Codex
+# - Claude Code, OpenAI Codex, Claude Squad
 # - Playwright with all browsers and system dependencies
 # - MCP Servers (Playwright, Context7, Sequential Thinking, Bright Data, Task Master)
 #
@@ -27,8 +27,8 @@ BLUE='\033[0;34m'
 NC='\033[0m' # No Color
 
 # Script version
-SCRIPT_VERSION="1.0.0"
-SCRIPT_DATE="2025-10-01"
+SCRIPT_VERSION="1.1.0"
+SCRIPT_DATE="2025-10-02"
 
 ################################################################################
 # Helper Functions
@@ -209,6 +209,19 @@ main() {
     print_success "OpenCode installed: ${OPENCODE_VERSION}"
     print_info "Alternative: Crush by Charm is the successor (charmbracelet/crush)"
 
+    print_info "Installing Claude Squad..."
+    print_info "Installing tmux dependency..."
+    apt install -y tmux 2>/dev/null || print_success "tmux already installed"
+    print_info "Installing Claude Squad via install script..."
+    curl -fsSL https://raw.githubusercontent.com/smtg-ai/claude-squad/main/install.sh | bash
+    # Source the PATH updates
+    if [ -f "/usr/local/bin/claude-squad" ]; then
+        ln -sf /usr/local/bin/claude-squad /usr/local/bin/cs 2>/dev/null || true
+    fi
+    CS_VERSION=$(cs version 2>/dev/null || claude-squad version 2>/dev/null || echo "installed - run 'cs version' to verify")
+    print_success "Claude Squad installed: ${CS_VERSION}"
+    print_info "Claude Squad manages multiple AI terminal agents in isolated workspaces"
+
     # Section 5: Playwright
     print_header "5. Installing Playwright with Browsers"
 
@@ -282,6 +295,7 @@ main() {
     echo "  • Claude Code: $(claude --version 2>/dev/null || echo 'v2.0.1 (run claude --version)')"
     echo "  • OpenAI Codex: $(codex --version 2>/dev/null || echo 'v0.42.0 (run codex --version)')"
     echo "  • OpenCode: $(/root/.opencode/bin/opencode --version 2>/dev/null || echo 'v0.0.55 (reload shell)')"
+    echo "  • Claude Squad: $(cs version 2>/dev/null || claude-squad version 2>/dev/null || echo 'installed (run cs version)')"
     echo ""
 
     # Browser Automation
@@ -328,14 +342,21 @@ main() {
     echo "   • Documentation: https://github.com/openai/codex"
     echo ""
 
-    echo "5. MCP Server Configuration:"
+    echo "5. Claude Squad Setup:"
+    echo "   • Run: cs (or claude-squad)"
+    echo "   • Manage multiple AI agents: Claude Code, Codex, Gemini, Aider"
+    echo "   • Works with isolated git workspaces for each task"
+    echo "   • Documentation: https://github.com/smtg-ai/claude-squad"
+    echo ""
+
+    echo "6. MCP Server Configuration:"
     echo "   • Context7: Requires API key from upstash.com"
     echo "   • Bright Data: Requires API token (free tier: 5,000 requests/month)"
     echo "   • Task Master: Requires API keys for AI providers"
     echo "   • Add MCP servers to Claude Code: claude mcp add <server-name>"
     echo ""
 
-    echo "6. Playwright Usage:"
+    echo "7. Playwright Usage:"
     echo "   • Installed globally with chromium, firefox, and webkit browsers"
     echo "   • Test: playwright --version"
     echo "   • Run codegen: playwright codegen https://example.com"
@@ -359,6 +380,7 @@ main() {
     echo "  gh --version"
     echo "  claude --version"
     echo "  codex --version"
+    echo "  cs version"
     echo "  playwright --version"
     echo ""
     print_success "Happy coding! 🚀"
